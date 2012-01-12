@@ -1,0 +1,8 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/oracle2posix.t
+t/posix2oracle.t
+lib/Convert/NLS_DATE_FORMAT.pm
+META.yml                                 Module meta-data (added by MakeMaker)
