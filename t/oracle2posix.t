@@ -1,12 +1,6 @@
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl Convert-NLS_DATE_FORMAT.t'
+use Test::More;
+use Convert::NLS_DATE_FORMAT;
 
-#########################
-
-# change 'tests => 1' to 'tests => last_test_to_print';
-
-use Test;
-BEGIN {
 our %tests = (
     'YYYY-MM-DD HH24:MI:SS TZR'    => '%Y-%m-%d %H:%M:%S %Z',
     'YYYY-MM-DD HH24:MI:SS TZHTZM' => '%Y-%m-%d %H:%M:%S %z',
@@ -25,16 +19,17 @@ our %tests = (
     'DD-MON-RR HH.MI.SSXFF AM'     => '%d-%b-%y %I.%M.%S.%6N %p',
     'DD-MON-RR HH.MI.SSXFF3 AM'    => '%d-%b-%y %I.%M.%S.%3N %p',
 );
-};
-BEGIN { plan tests => scalar(keys %tests) + 1 };
-use Convert::NLS_DATE_FORMAT;
-ok(1); # If we made it this far, we're ok.
 
-#########################
+plan tests => scalar(keys %tests) + 3;
 
-# Insert your test code below, the Test::More module is use()ed here so read
-# its man page ( perldoc Test::More ) for help writing this test script.
+pass; # If we made it this far, we're ok.
 
 while (my ($nls, $strf) = each %tests) {
-    ok(Convert::NLS_DATE_FORMAT::oracle2posix($nls), $strf, $nls);
+    is Convert::NLS_DATE_FORMAT::oracle2posix($nls) => $strf, $nls;
 }
+
+is Convert::NLS_DATE_FORMAT::oracle2posix( 'YEAR-MM-DD"T"HH24:MI:SS' ),
+    'YEAR-%m-%dT%H:%M:%S', "using YEAR";
+
+is Convert::NLS_DATE_FORMAT::oracle2posix( 'YYYY-MM-DD"T"HH24:MI:SS' ),
+    '%Y-%m-%dT%H:%M:%S', "escaped character";

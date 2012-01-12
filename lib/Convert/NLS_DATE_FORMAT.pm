@@ -71,20 +71,36 @@ our @formats = (
 my %formats = generate_formats();
 
 sub oracle2posix {
-    my $oracle_format = shift;
-    my $posix_format = $oracle_format;
-    my $c = 0;
-    while (my $key = $formats[$c++]) {
-        my $value = $formats[$c++];
-	if ($value) {
-	    if ($key =~ m/^[ap]m$/i) {
-		$posix_format =~ s/(?<!%)$key/$value/g;
-	    } else {
-		$posix_format =~ s/(?<!%)$key/$value/gi;
-	    }
-	}
+    # oracle format uses double quotes for
+    # escaping
+    return join '', 
+            map { _oracle2posix( $_ ) } 
+            split /(".*?")/, shift;
+}
+
+# convert a bit that is either escaped or not
+sub _oracle2posix {
+    my $string = shift;
+
+    # escaped, strip the quotes and return as-is
+    return $string if $string =~ s/^"(.*?)"$/$1/;
+
+    for my $i ( 0..$#formats/2 ) {
+        my ( $key, $value ) = @formats[ 2* $i, 2*$i + 1 ];
+
+        $key = qr/$key/i unless $key =~ m/^[ap]m$/i;
+
+        if ( $string =~ /(?<!%)$key/ ) {
+            if ( $value ) {
+                $string =~ s/(?<!%)$key/$value/g;
+            }
+            else {
+                warn "Oracle format '$key' has no POSIX equivalent\n";
+            }
+        }
     }
-    return $posix_format;
+
+    return $string;
 }
 
 sub posix2oracle {
